@@ -1,4 +1,4 @@
-const API_KEY = "rNQI1xdvV6cb3wiM2xeyDeEL-qM";
+const API_KEY = "VZn-Fx2ohpPGHAs_RhP_m6IgxYA";
 const API_URL = "https://ci-jshint.herokuapp.com/api";
 const resultsModal = new bootstrap.Modal(document.getElementById("resultsModal"));
 
@@ -17,47 +17,61 @@ async function postForm(e) {
         body: form,
     });
 
+    const data = await response.json();
+
+    if (response.ok) {
+        displayErrors(data);
+    } else {
+        throw new Error(data.error);
+    }
+
 }
 
 async function getStatus(e) {
 
     const queryString = `${API_URL}?api_key=${API_KEY}`;
-   
+
     const response = await fetch(queryString);
 
     const data = await response.json();
 
     if (response.ok) {
-        displayStatus(data); 
+        displayStatus(data);
     } else {
         throw new Error(data.error);
     }
+
 }
 
-function displayStatus(data) {
+function displayErrors(data) {
 
     let results = "";
 
     let heading = `JSHint Results for ${data.file}`;
-    if (data.total-errors === 0) {
+    if (data.total_errors === 0) {
         results = `<div class="no_errors">No errors reported!</div>`;
     } else {
-        results =`<div>Total Errors: <span class="errors_count">${data.total_errors}</span></div>`;
-        for (let error of data.error-list) {
-            results += `<div>At line <span class="line">${error.line}</span></div> `;
+        results = `<div>Total Errors: <span class="error_count">${data.total_errors}</span></div>`;
+        for (let error of data.error_list) {
+            results += `<div>At line <span class="line">${error.line}</span>, `;
             results += `column <span class="column">${error.col}:</span></div>`;
             results += `<div class="error">${error.error}</div>`;
         }
     }
 
-    function displayStatus(data) {
-
-    let heading = "API Key Status";
-    let results = `<div>Your key is valid until</div>`
-    results += `<div class="Key-status">${data.expiry}</div>`;
-
     document.getElementById("resultsModalTitle").innerText = heading;
     document.getElementById("results-content").innerHTML = results;
     resultsModal.show();
 }
+
+function displayStatus(data) {
+
+    let heading = "API Key Status";
+    let results = `<div>Your key is valid until</div>`;
+    results += `<div class="key-status">${data.expiry}</div>`;
+
+    document.getElementById("resultsModalTitle").innerText = heading;
+    document.getElementById("results-content").innerHTML = results;
+    resultsModal.show();
+
 }
